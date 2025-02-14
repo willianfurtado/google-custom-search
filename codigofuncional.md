@@ -1,0 +1,86 @@
+import axios from 'axios';
+import { StatusBar } from 'expo-status-bar';
+import { StyleSheet, Text, View, Button } from 'react-native';
+import React, { useState } from 'react';
+
+export default function App() {
+  const [results, setResults] = useState([]);
+
+  const searchGoogle = async (query, date) => {
+    const API_KEY = 'AIzaSyBuxqyLAUxTPhAaUkkXuHlNzBwTdz68vaU';
+    const CX = '55405deeab9a94cb5';
+
+    try {
+      const response = await axios.get('https://www.googleapis.com/customsearch/v1', {
+        params: {
+          key: API_KEY,
+          cx: CX,
+          q: `${query} ${date}`, // Query de busca
+          num: 3, // Quantidade de resultados retornados
+        },
+      });
+
+      // Processando os dados retornados
+      const fetchedResults = response.data.items.map(item => ({
+        title: item.title,
+        snippet: item.snippet,
+        link: item.link,
+      }));
+
+      console.log(fetchedResults);
+      setResults(fetchedResults); // Atualiza o estado com os resultados
+    } catch (error) {
+      console.error('Erro ao buscar no Google:', error);
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Mecanismo de busca do Google</Text>
+      <Button
+        title="Buscar Cotação"
+        onPress={() => searchGoogle('cotação soja', '2025-01-19')}
+      />
+      <View style={styles.results}>
+        {results.map((result, index) => (
+          <View key={index} style={styles.resultItem}>
+            <Text style={styles.resultTitle}>{result.title}</Text>
+            <Text>{result.snippet}</Text>
+            <Text style={styles.resultLink}>{result.link}</Text>
+          </View>
+        ))}
+      </View>
+      <StatusBar style="auto" />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  results: {
+    marginTop: 20,
+    alignItems: 'flex-start',
+  },
+  resultItem: {
+    marginBottom: 15,
+  },
+  resultTitle: {
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  resultLink: {
+    color: 'blue',
+    textDecorationLine: 'underline',
+  },
+});
